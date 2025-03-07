@@ -1,4 +1,5 @@
 import type { BuildConfig } from "bun";
+import { $ } from "bun";
 import dts from "bun-plugin-dts";
 
 const defaultBuildConfig: BuildConfig = {
@@ -35,4 +36,4 @@ await Promise.all([
 ]);
 
 // Make the CLI executable
-Bun.spawn(["chmod", "+x", "./dist/cli.js"]);
+$`chmod +x ./dist/cli.js`;

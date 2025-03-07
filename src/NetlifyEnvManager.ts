@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import { z } from "zod";
+import * as v from "valibot";
 import {
   ConfigSchema,
   type Config,
@@ -28,27 +28,24 @@ export class NetlifyEnvManager {
       "branch-deploy",
     ]
   ) {
-    // Validate config
     const { NETLIFY_ACCOUNT_ID, NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID } =
       this.validateConfig(config);
 
-    // Initialize client
     this.client = new NetlifyClient({
       accountId: NETLIFY_ACCOUNT_ID,
       authToken: NETLIFY_AUTH_TOKEN,
       siteId: NETLIFY_SITE_ID,
     });
 
-    // Store contexts
     this.contexts = contexts;
     console.log(`Using contexts: ${this.contexts.join(", ")}`);
   }
 
   private validateConfig(config: Record<string, unknown>): Config {
     try {
-      return ConfigSchema.parse(config);
+      return v.parse(ConfigSchema, config);
     } catch (error) {
-      if (error instanceof z.ZodError) {
+      if (error instanceof v.ValiError) {
         const issues = error.issues
           .map((issue) => `- ${issue.path.join(".")}: ${issue.message}`)
           .join("\n");
@@ -71,19 +68,16 @@ export class NetlifyEnvManager {
   async deleteExistingEnvVars(): Promise<void> {
     const varsToDelete = [];
 
-    // For each context, get and filter the vars
     for (const context of this.contexts) {
       console.log(`Fetching variables for context: ${context}...`);
       const contextVars = await this.getEnvVarsByContext(context);
 
-      // Only include non-protected vars
       const filteredVars = contextVars.filter(
         (env) => !this.PROTECTED_ENV_VARS.includes(env.key)
       );
       varsToDelete.push(...filteredVars);
     }
 
-    // Deduplicate by key since we might have the same var across different contexts
     const uniqueKeys = [...new Set(varsToDelete.map((v) => v.key))];
 
     console.log(
@@ -94,7 +88,6 @@ export class NetlifyEnvManager {
 
     if (uniqueKeys.length === 0) return;
 
-    // Delete in parallel with concurrency limit
     const limit = pLimit(this.CONCURRENCY_LIMIT);
     await Promise.all(
       uniqueKeys.map((key) =>
@@ -110,7 +103,6 @@ export class NetlifyEnvManager {
   async createEnvVars(
     envVars: NetlifyEnvVar[] | Record<string, unknown>
   ): Promise<void> {
-    // Convert config object to EnvVar array if needed
     const varsArray = !Array.isArray(envVars)
       ? this.createEnvVarsFromConfig(envVars)
       : envVars;

@@ -1,12 +1,13 @@
 import createClient from "openapi-fetch";
-import { z } from "zod";
-import type { components, paths } from "./types";
+import * as v from "valibot";
+import type {
+  components,
+  paths,
+} from "../node_modules/.netlify-types/netlify-api";
 
-// Extract and export types from the OpenAPI spec
 export type NetlifyContext = components["schemas"]["envVarValue"]["context"];
 export type NetlifyEnvVarValue = components["schemas"]["envVarValue"];
 
-// Define interfaces for our API types
 export interface NetlifyEnvVar {
   key: string;
   values: NetlifyEnvVarValue[];
@@ -20,21 +21,14 @@ export interface NetlifyClientConfig {
   siteId?: string;
 }
 
-// Zod schema for config validation
-export const ConfigSchema = z
-  .object({
-    NETLIFY_ACCOUNT_ID: z.string().min(1, "NETLIFY_ACCOUNT_ID is required"),
-    NETLIFY_AUTH_TOKEN: z.string().min(1, "NETLIFY_AUTH_TOKEN is required"),
-    NETLIFY_SITE_ID: z.string().optional(),
-  })
-  .passthrough(); // Allow additional properties that will become environment variables
+export const ConfigSchema = v.object({
+  NETLIFY_ACCOUNT_ID: v.string(),
+  NETLIFY_AUTH_TOKEN: v.string(),
+  NETLIFY_SITE_ID: v.string(),
+});
 
-// Typed config interface derived from Zod schema
-export type Config = z.infer<typeof ConfigSchema>;
+export type Config = v.InferOutput<typeof ConfigSchema>;
 
-/**
- * Netlify API client for managing environment variables
- */
 export class NetlifyClient {
   private client: ReturnType<typeof createClient<paths>>;
   private accountId: string;
