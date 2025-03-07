@@ -1,0 +1,17 @@
+# Source code and development files
+src/
+test/
+examples/
+openapi/
+build.ts
+tsconfig.json
+
+# Development configuration files
+.github/
+.gitignore
+.npmignore
+bun.lockb
+
+# Generated temporary files
+.DS_Store
+.temp/

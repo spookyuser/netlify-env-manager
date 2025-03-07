@@ -1,0 +1,48 @@
+{
+  "name": "netlify-env-manager",
+  "type": "module",
+  "version": "0.1.0",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "A library for managing Netlify environment variables",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "bin": "./dist/cli.js",
+  "scripts": {
+    "build": "bun run build.ts",
+    "prepublishOnly": "bun run generate-types && bun run build",
+    "generate-types": "openapi-typescript https://open-api.netlify.com/openapi.json -o ./node_modules/.netlify-types/netlify-api.ts",
+    "postinstall": "bun run generate-types"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "bun",
+    "netlify",
+    "environment-variables",
+    "devops"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/spookyuser/netlify-env-manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spookyuser/netlify-env-manager.git"
+  },
+  "bugs": "https://github.com/spookyuser/netlify-env-manager/issues",
+  "author": "spookyuser",
+  "devDependencies": {
+    "bun-plugin-dts": "^0.3.0",
+    "@types/bun": "^1.2.4"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.4",
+    "openapi-typescript": "^7.6.1",
+    "p-limit": "^6.2.0",
+    "zod": "^3.24.2"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+
+# Generated API types
+src/netlify-api.ts
+
+# Temporary files and generated content
+.temp/
+openapi/netlify-openapi.json
